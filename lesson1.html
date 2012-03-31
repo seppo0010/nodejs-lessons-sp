@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<title>Twitter Bootstrap</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/lessons.css" rel="stylesheet" type="text/css">
+		<link href="css/rainbow.css" rel="stylesheet" type="text/css">
+		<script type="text/javascript" src="js/rainbow-js.min.js"></script>
+	</head>
+	<body data-offset="50">
+	    <div class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<div class="nav-collapse">
+						<ul class="nav">
+							<li class="">
+								<a href="./lessons.html">Temario</a>
+							</li>
+							<li class="active">
+								<a href="./lesson1.html">Clase 1</a>
+							</li>
+							<li class="">
+								<a href="./lesson2.html">Clase 2</a>
+							</li>
+							<li class="">
+								<a href="./lesson3.html">Clase 3</a>
+							</li>
+							<li class="">
+								<a href="./lesson4.html">Clase 4</a>
+							</li>
+							<li class="">
+								<a href="./lesson5.html">Clase 5</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	    <div class="container">
+		<h1>Clase 1</h1>
+		<p>Referencia del lenguaje. Tipos de datos. Prototipado y constructores. Notación de objetos. Métodos y propiedades. Funciones lambda y peculiaridades de scope. Métodos de Array y String.</p>
+		<p>Para declarar una variable en javascript se le antecede "var" al nombre. Los tipos son null, booleanos, números (enteros y flotantes), strings, array, objetos. Al final de cada sentencia va un punto y coma. En caso de no ponerlo el interprete lo agrega automáticamente al final de cada línea, lo cual no siempre puede ser lo que uno quiere, por lo que se recomienda ponerlos siempre.</p>
+
+		<pre><code data-language="javascript">
+		var a = 1;
+		var b = 2.1, c = null, d = true, e = false, f = "hola", g = 'chau';
+		var h = [1, 2, 3, 4], i = { "clave": "valor" };
+		</code></pre>
+
+		<p>Comillas dobles y simples son iguales para los strings. Con corchetes se crea un array y los elementos separados por coma se agregan adentro. Con llaves se crean objetos que tienen clave y valor, separados por dos puntos.</p>
+		<p>No existen clases, pero sí prototipado. Los tipos de objetos se 	declaran como funciones, y se les llama new para recibir una nueva 	instancia. "this" hace referencia al objeto creado, y punto se usa 	para acceder a métodos y propiedades. Las funciones son variables comunes, o sea que no puede haber un miembro y un método con el mismo nombre porque se sobreescriben.</p>
+
+		<pre><code data-language="javascript">
+		function Obj() {
+			this.doSomething(); // prints "doing something"
+			this.doSomething = function () {
+				console.log('doing something else');
+			};
+			this.doSomething(); // prints "doing something else"
+		}
+
+		Obj.prototype.doSomething = function () {
+			console.log('doing something');
+		}
+
+		var myObj = new Obj();
+		myObj.doSomething(); // prints "doing something else"
+		</code></pre>
+
+		<p>Como no existen clases, tampoco existe herencia, pero usando la propiedad prototype se puede hacer algo parecido, ya que funciona como cualquier objeto. Es común que los objetos tengan <a href="https://es.wikipedia.org/wiki/Observer_%28patr%C3%B3n_de_dise%C3%B1o%29%29" target="_blank">observers</a> que son notificados de los cambios. En general, la clase observada "hereda" de un emisor de eventos y los objetos que observan se suscriben al evento, generalmente identificado con un string, y un callback para que se llame cuando el evento ocurre. Los parámetros del callback varían de acuerdo al evento.</p>
+
+		<pre><code data-language="javascript">
+		var Animal = function() { /* ... */ };
+		Animal.prototype = { /* ... */ };
+
+		var Dog = function() { /* ... */ };
+		Dog.prototype = Animal.prototype;
+		Dog.prototype.bark = function () {
+			console.log('guau');
+			this.emit('talk', 'guau'); // calling observers
+		}
+
+		var Cat = function() {
+			var dog = new Dog();
+			dog.on('talk', function(message) {
+				if (message == 'grrr') console.log('Run kitty!');
+			});
+		}
+		</code></pre>
+
+		<p>Ya varias veces aparecieron las funciones lambdas. Éstas son funciones anónimas (que no tienen un nombre global como las funciones en general) que se pueden guardar en una variable o pasar como parámetro. Las funciones de JavaScript tienen acceso al scope donde fueron declaradas, pudiendo leer y modificar las variables no locales. Cualquier variable que dentro de la función no aparezca con "var" la primera vez que se usa, pertenece al scope del padre. Para llamar funciones existen dos métodos particulares: "apply" y "call". Ambas funciones reciben primer un objeto que va a ser "this" dentro de la función, y en el caso de "apply" el segundo parámetro es un array de parámetros, mientras que "call" recibe una lista de parámetros. Cuando se llama a una función la variable "arguments" se inicializa con (algo parecido a) un array con los parámetros recibidos.</p>
+		<pre><code data-language="javascript">
+		var i = 0;
+		var sum = function() {
+			var sum = 0, j;
+			for (j = 0; j < arguments.length; j++) {
+				sum += arguments[j];
+			}
+			console.log('sum is ' + sum);
+			if (this + 0 == this) // funny way to check if this is a number
+				console.log('total is ' + (i++ + this + sum));
+		}
+		sum(2, 3); // sum is 5
+		sum.apply(1, [2, 3]); // sum is 5, total is 7
+		sum.call(1, 2, 3); // sum is 5, total is 8
+		</code></pre>
+
+		<p>Un problema común es el "this" los callbacks. Si uno sólo pasa la función, cuando lo invoquen es posible que le cambien el contexto. Para eso hay dos soluciones comunes: la primera es usar una variable local ("self") que apunte al mismo objeto que this, la alternativa es usar una función "bind" que devuelve la función con el contexto correcto.</p>
+		<pre><code data-language="javascript">
+		myClass.prototype = {
+			"myFunc": function(obj) {
+				var self = this;
+				obj.on('data', function(data) {
+					self.receivedData(data);
+				});
+			}
+			"myFunc2": function(obj) {
+				obj.on('data', (function(data) {
+					this.receivedData(data);
+				}).bind(this));
+			}
+		}
+		Function.prototype.bind = function(obj) {
+			var args = Array.prototype.slice.call(arguments); // get a _real_ array.
+			var func = this;
+			return function() {
+				func.apply(obj, args);
+			}
+		}
+		</code></pre>
+		</div>
+</body></html>
